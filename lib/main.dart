@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         title: 'Namer App',
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.yellow),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.redAccent),
         ),
         home: MyHomePage(),
       ),
@@ -41,6 +41,14 @@ class MyAppState extends ChangeNotifier {
     } else {
       favorites.add(current);
     }
+    notifyListeners();
+  }
+
+  void removeFavorite(WordPair item) {
+    if (favorites.contains(item)) {
+      favorites.remove(item);
+    }
+
     notifyListeners();
   }
 }
@@ -124,10 +132,43 @@ class FavoritePage extends StatelessWidget {
               '${appState.favorites.length} favorites'),
         ),
         for (var pair in appState.favorites)
-          ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text(pair.asLowerCase),
-          ),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                  ),
+                  clipBehavior: Clip
+                      .antiAlias, //this is the fix (the decoration above is required when using clipBehavior
+                  child: Dismissible(
+                    key: Key(pair
+                        .asLowerCase), // Deve ser exclusivo para cada ListTile
+                    direction: DismissDirection.endToStart,
+                    onDismissed: (direction) {
+                      if (direction == DismissDirection.endToStart) {
+                        appState.removeFavorite(pair);
+                      }
+                    },
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: EdgeInsets.only(
+                          right: 16.0), // Cor de fundo ao arrastar
+                      child: Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                      ),
+                    ),
+                    child: ListTile(
+                      leading: Icon(Icons.favorite),
+                      title: Text(pair.asLowerCase),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )
       ],
     );
   }
